@@ -1,7 +1,12 @@
 clear all
 clc
-cd('C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\dtagAnlys')
-addpath(genpath('C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\dtagAnlys'))
+if strcmpi(getenv('COMPUTERNAME'), 'shao')
+    folderDir = 'E:\Dropbox\SpeedSensor\dtagAnlys';
+elseif strcmpi(getenv('COMPUTERNAME'), 'shaoy')
+    folderDir = 'C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\dtagAnlys';
+end
+cd(folderDir)
+addpath(genpath(folderDir))
 
 %%
 % % recdir = 'C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\DTAG\Data';

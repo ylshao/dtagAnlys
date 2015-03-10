@@ -2,31 +2,32 @@ function plotSeg(TagData)
 
 %% Plot Divided Segments
 figure; ax = [];
-data = TagData.accelTagOrig(:,1);
+accelX = TagData.accelTagOrig(:,1);
+timeHour = TagData.timeHour;
+depthShiftFilt = TagData.depthShiftFilt;
+DepthSeg = TagData.DepthSeg;
+
 ax(1) = subplot(211);
 plot(TagData.timeHour, TagData.depthShiftFilt, 'b')
 hold on; 
-plot(TagData.timeHour(TagData.DepthSeg.surfSeg),...
-    TagData.depthShiftFilt(TagData.DepthSeg.surfSeg), 'r.');
-plot(TagData.timeHour(TagData.DepthSeg.descSeg),...
-    TagData.depthShiftFilt(TagData.DepthSeg.descSeg), 'c.');
-plot(TagData.timeHour(TagData.DepthSeg.ascSeg),...
-    TagData.depthShiftFilt(TagData.DepthSeg.ascSeg), 'g.');
-plot(TagData.timeHour(TagData.DepthSeg.botSeg),...
-    TagData.depthShiftFilt(TagData.DepthSeg.botSeg), 'm.');
+plotSegFromCell(timeHour, depthShiftFilt, DepthSeg.Surf, 'r.')
+plotSegFromCell(timeHour, depthShiftFilt, DepthSeg.Desc, 'c.')
+plotSegFromCell(timeHour, depthShiftFilt, DepthSeg.Asc, 'g.')
+plotSegFromCell(timeHour, depthShiftFilt, DepthSeg.Bot, 'm.')
 xlabel('time [hour]'); ylabel('depth')
 legend('orig', 'surf', 'desc', 'asc')
 ax(2) = subplot(212);
-plot(TagData.timeHour, data); hold on; 
-plot(TagData.timeHour, zeros(numel(TagData.timeHour), 1), 'k--')
+plot(timeHour, accelX); hold on; 
+plot(timeHour, zeros(numel(timeHour), 1), 'k--')
 xlabel('time [hour]'); ylabel('accel X [m/s^2]')
-plot(TagData.timeHour(TagData.DepthSeg.surfSeg),...
-    data(TagData.DepthSeg.surfSeg), 'r.');
-plot(TagData.timeHour(TagData.DepthSeg.descSeg),...
-    data(TagData.DepthSeg.descSeg), 'c.');
-plot(TagData.timeHour(TagData.DepthSeg.ascSeg),...
-    data(TagData.DepthSeg.ascSeg), 'g.');
-plot(TagData.timeHour(TagData.DepthSeg.botSeg),...
-    data(TagData.DepthSeg.botSeg), 'm.');
+plotSegFromCell(timeHour, accelX, DepthSeg.Surf, 'r.')
+plotSegFromCell(timeHour, accelX, DepthSeg.Desc, 'c.')
+plotSegFromCell(timeHour, accelX, DepthSeg.Asc, 'g.')
+plotSegFromCell(timeHour, accelX, DepthSeg.Bot, 'm.')
 linkaxes(ax, 'x')
+end
+
+function plotSegFromCell(time, Data, Seg, color)
+plot(time(cell2mat(Seg.segCell)),...
+    Data(cell2mat(Seg.segCell)), color);
 end

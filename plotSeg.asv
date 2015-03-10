@@ -1,0 +1,29 @@
+function plotSeg(TagData)
+
+%% Plot Divided Segments
+figure; ax = [];
+accelX = TagData.accelTagOrig(:,1);
+ax(1) = subplot(211);
+plot(TagData.timeHour, TagData.depthShiftFilt, 'b')
+hold on; 
+plotSegFromCell(TagData.timeHour, TagData.depthShiftFilt, TagData.DepthSeg.Surf, 'r.')
+plotSegFromCell(TagData.timeHour, TagData.depthShiftFilt, TagData.DepthSeg.Desc, 'c.')
+plotSegFromCell(TagData.timeHour, TagData.depthShiftFilt, TagData.DepthSeg.Asc, 'g.')
+plotSegFromCell(TagData, TagData.depthShiftFilt, TagData.DepthSeg.Bot, 'm.')
+xlabel('time [hour]'); ylabel('depth')
+legend('orig', 'surf', 'desc', 'asc')
+ax(2) = subplot(212);
+plot(TagData.timeHour, accelX); hold on; 
+plot(TagData.timeHour, zeros(numel(TagData.timeHour), 1), 'k--')
+xlabel('time [hour]'); ylabel('accel X [m/s^2]')
+plotSegFromCell(TagData, accelX, TagData.DepthSeg.Surf, 'r.')
+plotSegFromCell(TagData, accelX, TagData.DepthSeg.Desc, 'c.')
+plotSegFromCell(TagData, accelX, TagData.DepthSeg.Asc, 'g.')
+plotSegFromCell(TagData, accelX, TagData.DepthSeg.Bot, 'm.')
+linkaxes(ax, 'x')
+end
+
+function plotSegFromCell(time, Data, Seg, color)
+plot(time(cell2mat(Seg.segCell)),...
+    Data(cell2mat(Seg.segCell)), color);
+end
