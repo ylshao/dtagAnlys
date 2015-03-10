@@ -94,21 +94,22 @@ for iSeg = 1:(surfNum-1)
 end
 botBeg = descEnd(1:(end-1))+1;
 botEnd = ascBeg(2:end)-1;
-[~, surfSegCell, Surf] = collectSeg(dataLength, surfBeg, surfEnd, timeHour);
-[descSeg, descSegCell, Desc] = collectSeg(dataLength, descBeg, descEnd, timeHour);
-[ascSeg, ascSegCell, Asc] = collectSeg(dataLength, ascBeg, ascEnd, timeHour);
-[botSeg, botSegCell, Bot] = collectSeg(dataLength, botBeg, botEnd, timeHour);
+[~, surfSegCell] = collectSeg(dataLength, surfBeg, surfEnd);
+[descSeg, descSegCell] = collectSeg(dataLength, descBeg, descEnd);
+[ascSeg, ascSegCell] = collectSeg(dataLength, ascBeg, ascEnd);
+[botSeg, botSegCell] = collectSeg(dataLength, botBeg, botEnd);
 %% Construct the output
-DepthSeg.Surf = Surf;
-DepthSeg.Asc = Asc;
-DepthSeg.Desc = Desc;
-DepthSeg.Bot = Bot;
+DepthSeg.surf.locInd = [surfBeg surfEnd];
+DepthSeg.surf.segCell = surfSegCell;
+DepthSeg.surf.timeCell = surfTimeCell;
+DepthSeg.surf.num = surfNum;
+DepthSeg.surf.
 fprintf('\nfind seg num %d\n', surfNum)
 %% Sanity Check
-% sanityCheckNan(DepthSeg.asc, 'asc')
-% sanityCheckNan(DepthSeg.desc, 'desc')
-% sanityCheckNan(DepthSeg.surf, 'surf')
-% sanityCheckNan(DepthSeg.bot, 'bot')
+sanityCheckNan(DepthSeg.asc, 'asc')
+sanityCheckNan(DepthSeg.desc, 'desc')
+sanityCheckNan(DepthSeg.surf, 'surf')
+sanityCheckNan(DepthSeg.bot, 'bot')
 
 sanityCheckRev(ascBeg, ascEnd, 'Asc Beg & Asc End')
 sanityCheckRev(ascEnd, surfBeg, 'Asc End & Surf Beg')
@@ -148,7 +149,7 @@ function sanityCheckRev(segBeg, segEnd, txt)
     end
 end
 
-function [seg, segCell, Seg] = collectSeg(length, segBeg, segEnd, timeHour)
+function [seg, segCell] = collectSeg(length, segBeg, segEnd, timeHour)
 % [time_pks, data_pks] = getPeaks(time, data, thld_rub, thld_zero, loc_min_flag)
 %   The function searches through all the data points to find local peaks.
 %   A rubbish bound is defined, start from previous peak, only points
@@ -168,15 +169,8 @@ for iSeg = 1:numel(segBeg)
         segSel(segBeg(iSeg):segEnd(iSeg)) = ...
         ones(segEnd(iSeg) - segBeg(iSeg) + 1, 1);
         segCell{iSeg} = (segBeg(iSeg):segEnd(iSeg))';
-        timeCell{iSeg} = timeHour(segBeg(iSeg):segEnd(iSeg));
+        segCell{iSeg} = (segBeg(iSeg):segEnd(iSeg))';
     end    
 end
 seg = find(~isnan(segSel));
-
-Seg.locInd = [segBeg segEnd];
-Seg.segCell = segCell;
-Seg.timeCell = timeCell;
-Seg.num = numel(segBeg);
 end
-
-

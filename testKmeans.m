@@ -10,9 +10,7 @@ CLUST_NUM = 20;
 [clustInd, centrd] = kmeans(metric, CLUST_NUM);
 disp(centrd)
 %%
-CENT_NUM = 13;
-thisSeg = cell2mat(TagData.DepthSeg.botSegCell(clustInd == CENT_NUM));
-
+% CENT_NUM = 14;
 accelX = TagData.accelTagOrig(:,1);
 pitchDeg = TagData.pitchDeg;
 figure; ax = [];
@@ -33,16 +31,29 @@ ax(2) = subplot(312);
 plot(TagData.timeHour, accelX)
 hold on; 
 plot(TagData.timeHour, zeros(numel(TagData.timeHour), 1), 'k--')
-plot(TagData.timeHour(thisSeg),...
-    accelX(thisSeg), 'r.');
+
 xlabel('time [hour]'); ylabel('accel X [m/s^2]')
 
 ax(3) = subplot(313);
 plot(TagData.timeHour, pitchDeg)
 hold on; 
 plot(TagData.timeHour, zeros(numel(TagData.timeHour), 1), 'k--')
-plot(TagData.timeHour(thisSeg),...
-    pitchDeg(thisSeg), 'r.');
+
 xlabel('time [hour]'); ylabel('pitch [deg]')
 
 linkaxes(ax, 'x')
+
+%
+flukeCentrd = find(centrd(:, 1) < 1 & centrd(:, 1) > 0.6);
+% centrdArray = centrd(flukeCentrd);
+for iCentrd = 1:numel(centrdArray)
+    thisSeg = cell2mat(TagData.DepthSeg.botSegCell...
+        (clustInd == flukeCentrd(iCentrd)));
+
+subplot(312);
+plot(TagData.timeHour(thisSeg),...
+    accelX(thisSeg), 'r.');
+subplot(313);
+plot(TagData.timeHour(thisSeg),...
+    pitchDeg(thisSeg), 'r.');
+end
