@@ -1,12 +1,5 @@
 clear all
 clc
-if strcmpi(getenv('COMPUTERNAME'), 'shao')
-    folderDir = 'E:\Dropbox\SpeedSensor\dtagAnlys';
-elseif strcmpi(getenv('COMPUTERNAME'), 'shaoy')
-    folderDir = 'C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\dtagAnlys';
-end
-cd(folderDir)
-addpath(genpath(folderDir))
 
 %%
 % % recdir = 'C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\DTAG\Data';
@@ -23,7 +16,7 @@ addpath(genpath(folderDir))
 % end
 % %%
 % tempFeb24
-load('dataMar7')
+load('dataMar7', 'TagData', 'nTagData')
 %% Moving Average
 rawData = TagData(1).depthShift;
 avrgWindow = 10;
@@ -43,7 +36,7 @@ TagData(1).depthShiftFilt = filtData;
 
 DepthSeg = getSeg(TagData(1));
 TagData(1).DepthSeg = DepthSeg;
-% plotSeg(TagData(1))
+plotSeg(TagData(1))
 
 %% get statical data
 % add: speed estimation
@@ -112,38 +105,27 @@ figure; plot(time, data); hold on
 fprintf('\nind = %d:%d;\n', ind(1), ind(end))
 %%
 figure(1011);clf; ax = [];
-data = TagData.accelTagOrig(:,:);
+data = TagData(1).accelTagOrig(:,:);
 ax(1) = subplot(211);
-plot(TagData.timeHour, TagData.depthShiftFilt, 'b')
+plot(TagData(1).timeHour, TagData(1).depthShiftFilt, 'b')
 xlabel('time [hour]'); ylabel('depth')
 legend('orig', 'surf', 'desc', 'asc')
 ax(2) = subplot(212);
-plot(TagData.timeHour, data); hold on; 
-plot(TagData.timeHour, zeros(numel(TagData.timeHour), 3), 'k--')
+plot(TagData(1).timeHour, data); hold on; 
+plot(TagData(1).timeHour, zeros(numel(TagData(1).timeHour), 3), 'k--')
 xlabel('time [hour]'); ylabel('accel X [m/s^2]')
 legend('x', 'y', 'z')
 linkaxes(ax, 'x')
 %%
 figure(1012);clf; ax = [];
-data = [TagData.pitchDeg TagData.headDeg];
+data = [TagData(1).pitchDeg TagData(1).rollDeg];% TagData(1).headDeg]; % define which to plot
 ax(1) = subplot(211);
-plot(TagData.timeHour, TagData.depthShiftFilt, 'b')
-hold on
-plot(TagData.timeHour(TagData.DepthSeg.surfSeg),...
-    TagData.depthShiftFilt(TagData.DepthSeg.surfSeg), 'r.');
-plot(TagData.timeHour(TagData.DepthSeg.descSeg),...
-    TagData.depthShiftFilt(TagData.DepthSeg.descSeg), 'c.');
-plot(TagData.timeHour(TagData.DepthSeg.ascSeg),...
-    TagData.depthShiftFilt(TagData.DepthSeg.ascSeg), 'g.');
-plot(TagData.timeHour(TagData.DepthSeg.botSeg),...
-    TagData.depthShiftFilt(TagData.DepthSeg.botSeg), 'm.');
-xlabel('time [hour]'); ylabel('depth')
-legend('orig', 'surf', 'desc', 'asc')
+plotDepthSeg(TagData(1))
 ax(2) = subplot(212);
-plot(TagData.timeHour, data); hold on; 
-plot(TagData.timeHour, zeros(numel(TagData.timeHour), 3), 'k--')
+plot(TagData(1).timeHour, data); hold on; 
+plot(TagData(1).timeHour, zeros(numel(TagData(1).timeHour), 3), 'k--')
 xlabel('time [hour]'); ylabel('orient [deg]')
-legend('pitch', 'head')
+legend('pitch', 'roll', 'head')
 linkaxes(ax, 'x')
     
 %% PIP test
@@ -168,8 +150,8 @@ for i = 1:3
 end
 
 figure;
-plot(TagData.timeHour, TagData.depthShiftFilt)
+plot(TagData(1).timeHour, TagData(1).depthShiftFilt)
 hold on
-plot(TagData.timeHour(pipSeg), TagData.depthShiftFilt(pipSeg), 'r.')
+plot(TagData(1).timeHour(pipSeg), TagData(1).depthShiftFilt(pipSeg), 'r.')
 %% FFT
 figure; hold on; DataPlot_Feb1([], TagData(1).depth.shiftFilt, 'fft', '', fs)
