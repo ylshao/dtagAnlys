@@ -1,8 +1,8 @@
 clear all
 clc
-cd('C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\DTAG\dataAnlys')
-addpath(genpath('C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\DTAG\dataAnlys'))
-addpath(genpath('C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\DTAG\dataOffline'))
+% cd('C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\DTAG\dataAnlys')
+% addpath(genpath('C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\DTAG\dataAnlys'))
+% addpath(genpath('C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\DTAG\dataOffline'))
 %%
 % % recdir = 'C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\DTAG\Data';
 % prefix = 'tt13_268a';
