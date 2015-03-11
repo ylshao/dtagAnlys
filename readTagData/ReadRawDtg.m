@@ -9,7 +9,7 @@ end
 prefix = 'tt13_268a';
 
 df = 10; % sample the data with 1/df rate
-
+initPath(recdir)
 nTagData = 1;
 TagData(nTagData) = struct;
 TagData(nTagData).deployName = prefix;
