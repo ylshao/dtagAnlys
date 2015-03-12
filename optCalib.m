@@ -5,7 +5,7 @@ while ~satisCalib
     TagData = reoptCalib(TagData, nTagData);
     correctKey = 0;
     while ~correctKey
-    keyPress = input('Satis for the calib? y, n', 's');
+    keyPress = input('Satis for the calib? y, n  ', 's');
     switch keyPress(1)
         case 'y'
             satisCalib = 1;

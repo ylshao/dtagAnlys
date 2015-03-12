@@ -19,7 +19,7 @@ clc
 % %%
 % tempFeb24
 % load('dataMar7')
-TagData = shiftDepth(TagData, nTagData, 'interp');
+TagData = shiftDepth(TagData, nTagData, 'max');
 %% Moving Average
 rawData = TagData(1).depthShift;
 avrgWindow = 10;
@@ -71,7 +71,7 @@ plotFluke(TagData(1))
 %% Get glide
 GlideSeg = getGlide(TagData(1));
 TagData(1).GlideSeg = GlideSeg;
-% plotGlide(TagData(1))
+plotGlide(TagData(1))
 %% Get encounter
 % change: need to improve the detection of surface
 

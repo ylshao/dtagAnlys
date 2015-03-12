@@ -16,7 +16,7 @@ TagData(nTagData).deployName = prefix;
 TagData(nTagData).desampFreq = df;
 %%
 TagData = readSwv(TagData, nTagData, recdir);
-TagData(nTagData).dataLength = numel(TagData(nTagData).depth);
+TagData(nTagData).dataLength = numel(TagData(nTagData).depthOrig);
 %%
 TagData = optCalib(TagData, nTagData);
 %%

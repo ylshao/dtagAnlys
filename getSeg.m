@@ -67,8 +67,8 @@ ascBeg = nan(surfNum, 1);
 % define the criteria for descend end and ascend begin
 DESC_END_PITCH_DEG = 0; % if pitch exceeds 5 degrees, descent ends
 ASC_BEG_PITCH_DEG = 0;
-ascBeg(1) = find(pitchDeg(1:surfBeg(1)) < ASC_BEG_PITCH_DEG, 1, 'last'); % the last time that pitch still has negative value
-descEnd(end) = find(pitchDeg(surfEnd(end):end) > DESC_END_PITCH_DEG, 1, 'first') + surfEnd(end) - 1; % the first time that pitch becomes positive
+ascBeg(1) = find(pitchDeg(1:ascEnd(1)-1) < ASC_BEG_PITCH_DEG, 1, 'last'); % the last time that pitch still has negative value
+descEnd(end) = find(pitchDeg(descBeg(end)+1:end) > DESC_END_PITCH_DEG, 1, 'first') + surfEnd(end) - 1; % the first time that pitch becomes positive
 if isempty(ascBeg(1)); ascBeg(1) = ascEnd(1); end
 if isempty(descEnd(end)); descEnd(end) = descBeg(end); end
 

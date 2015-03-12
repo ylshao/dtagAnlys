@@ -28,7 +28,7 @@ if strcmpi(method, 'interp')
 elseif strcmpi(method, 'max')
     shiftDepthMeter = nan(numel(depth), 1);
     dep = [depthPeak(1); depthPeak; depthPeak(end)];
-    indPeak = [1; indPeak; length(t_h)];
+    indPeak = [1; indPeak; length(timeHour)];
     ARVG_WIN = 10;
     shiftDepthMeter(1:indPeak(1+floor(ARVG_WIN/2))) = max(dep(1:1+floor(ARVG_WIN/2)));
     for i = 1+floor(ARVG_WIN/2):length(indPeak)-floor(ARVG_WIN/2)
