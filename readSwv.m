@@ -1,7 +1,7 @@
 function TagData = readSwv(TagData, nTagData, recdir)
 
 prefix = TagData(nTagData).deployName;
-RawVolt = d3readswv(recdir,prefix,TagData.desampFreq);
+RawVolt = d3readswv(recdir,prefix,TagData(nTagData).desampFreq);
 % [ch_names,descr,ch_nums,type] = d3channames(X.cn);
 % Register the deployment:
 [Calib,~] = d3deployment(recdir, prefix, prefix) ;

@@ -6,24 +6,33 @@ if strcmpi(getenv('COMPUTERNAME'), 'shao')
 else
     recdir = 'E:\DQ_All_Day_Data';
 end
-prefix = 'tt13_268a';
+
+deployArray = {'tt13_266a', 'tt13_267a', 'tt13_268a', ...
+            'tt13_269a', 'tt13_270a', 'tt13_270d', 'tt13_271c'};
+
+nDeploy = numel(deployArray);
+TagData(nDeploy, 1) = struct; 
+%%
+for iTagData = 1:nDeploy
+%%
+thisDeploy = deployArray{iTagData};
 
 df = 10; % sample the data with 1/df rate
 initPath(recdir)
-nTagData = 1;
-TagData(nTagData) = struct;
-TagData(nTagData).deployName = prefix;
-TagData(nTagData).desampFreq = df;
+
+TagData(iTagData).deployName = thisDeploy;
+TagData(iTagData).desampFreq = df;
 %%
-TagData = readSwv(TagData, nTagData, recdir);
-TagData(nTagData).dataLength = numel(TagData(nTagData).depthOrig);
+TagData = readSwv(TagData, iTagData, recdir);
+TagData(iTagData).dataLength = numel(TagData(iTagData).depthOrig);
 %%
-TagData = optCalib(TagData, nTagData);
+TagData = optCalib(TagData, iTagData);
 %%
 orientTab = [0 0 0 180 0];
-TagData = estOrient(TagData, nTagData, orientTab);
+TagData = estOrient(TagData, iTagData, orientTab);
 %%
 TagData = orderfields(TagData);
+end
 %%
 TH = 0.2;
 surface = 0.1;
