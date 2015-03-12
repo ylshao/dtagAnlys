@@ -18,7 +18,20 @@ TagData(nTagData).desampFreq = df;
 TagData = readSwv(TagData, nTagData, recdir);
 TagData(nTagData).dataLength = numel(TagData(nTagData).depth);
 %%
-TagData = optCalib(TagData, nTagData);
+satisCalib = 0;
+while ~satisCalib
+    TagData = optCalib(TagData, nTagData);
+    correctKey = 0;
+    while ~correctKey
+    keyPress = input('Satis for the calib? y, n');
+    switch keyPress
+        case 'y'
+            satisCalib = 1;
+        case 'n'
+            
+    end
+    end
+end
 %%
 orientTab = [0 0 0 180 0];
 TagData = estOrient(TagData, nTagData, orientTab);

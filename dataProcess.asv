@@ -19,7 +19,7 @@ clc
 % %%
 % tempFeb24
 % load('dataMar7')
-TagData = shiftDepth(TagData, nTagData, 'interp');
+TagData = shiftDepth(TagData, nTagData, 'interp')
 %% Moving Average
 rawData = TagData(1).depthShift;
 avrgWindow = 10;
