@@ -1,4 +1,4 @@
-function FlukeSeg = getFluke(DepthSeg, SegStat, TagData, FlukeThld)
+function FlukeSeg = getFluke(TagData, FlukeThld)
 % [time_pks, data_pks] = getPeaks(time, data, thld_rub, thld_zero, loc_min_flag)
 %   The function searches through all the data points to find local peaks.
 %   A rubbish bound is defined, start from previous peak, only points
@@ -11,52 +11,54 @@ function FlukeSeg = getFluke(DepthSeg, SegStat, TagData, FlukeThld)
 %   loc_min_flag determine which peak to find 
 %       1: find local maxima & minima, 0: only find local maxima
 
-if nargin < 4
+if nargin < 2
     help getFluke;
 end
 
+DepthSeg = TagData.DepthSeg;
+timeHour = TagData.timeHour;
 %%
-[flukeDesc, flukeDescSeg, flukeDescNum] = getFlukeSeg(SegStat.DescStat, DepthSeg.descBeg, ...
-            DepthSeg.descEnd, FlukeThld);
-[flukeAsc, flukeAscSeg, flukeAscNum] = getFlukeSeg(SegStat.AscStat, DepthSeg.ascBeg, ...
-            DepthSeg.ascEnd, FlukeThld);
-[flukeBot, flukeBotSeg, flukeBotNum] = getFlukeSeg(SegStat.BotStat, DepthSeg.botBeg, ...
-            DepthSeg.botEnd, FlukeThld);
+Desc = getFlukeSeg(DepthSeg.Desc, FlukeThld, timeHour);
+Asc = getFlukeSeg(DepthSeg.Asc, FlukeThld, timeHour);
+Bot = getFlukeSeg(DepthSeg.Bot, FlukeThld, timeHour);
 %%
-FlukeSeg.flukeDesc = flukeDesc;
-FlukeSeg.flukeAsc = flukeAsc;
-FlukeSeg.flukeBot = flukeBot;
-
-FlukeSeg.flukeDescSeg = flukeDescSeg;
-FlukeSeg.flukeAscSeg = flukeAscSeg;
-FlukeSeg.flukeBotSeg = flukeBotSeg;
-
-FlukeSeg.flukeDescNum = flukeDescNum;
-FlukeSeg.flukeAscNum = flukeAscNum;
-FlukeSeg.flukeBotNum = flukeBotNum;
+FlukeSeg.Desc = Desc;
+FlukeSeg.Asc = Asc;
+FlukeSeg.Bot = Bot;
 
 %%
-flukeNumSum = FlukeSeg.flukeAscNum + FlukeSeg.flukeBotNum + FlukeSeg.flukeDescNum;
+flukeNumSum = FlukeSeg.Asc.num + FlukeSeg.Bot.num + FlukeSeg.Desc.num;
 fprintf('\nNum of flukes find %d\nAsc Num %d, Bot Num %d, desc Num %d\n',...
-    flukeNumSum, flukeAscNum, flukeBotNum, flukeDescNum)
+    flukeNumSum, FlukeSeg.Asc.num, FlukeSeg.Bot.num, FlukeSeg.Desc.num)
 end
 
 
-function [fluke, flukeSeg, flukeNum] = getFlukeSeg(data, segBeg, segEnd, FlukeThld)
+function Fluke = getFlukeSeg(Seg, FlukeThld, timeHour)
 
-isFluke = data.peakFreq > FlukeThld.minFreq ...
-            & data.peakFreq < FlukeThld.maxFreq ...
-            & data.mainAmp > FlukeThld.minAmp ...
-            & data.mainAmp < FlukeThld.maxAmp; % pitch 0.5 1 10 15
-flukeInd = find(isFluke);
-flukeNum = numel(flukeInd);
-flukeSel = nan(max(segEnd)+100, 1);
-fluke = nan(flukeNum, 2);
-for iFluke = 1:flukeNum
-    flukeSel(segBeg(flukeInd(iFluke)):segEnd(flukeInd(iFluke))) = ...
-        ones(segEnd(flukeInd(iFluke)) - segBeg(flukeInd(iFluke)) + 1, 1);
-    fluke(iFluke, :) = [segBeg(flukeInd(iFluke)) segEnd(flukeInd(iFluke))];
-end
-flukeSeg = find(~isnan(flukeSel));
+isFluke = Seg.peakFreq > FlukeThld.minFreq ...
+            & Seg.peakFreq < FlukeThld.maxFreq ...
+            & Seg.mainAmp > FlukeThld.minAmp ...
+            & Seg.mainAmp < FlukeThld.maxAmp; % pitch 0.5 1 10 15
+        
+    segBeg = Seg.begEndInd(:,1);
+    segEnd = Seg.begEndInd(:,2);
+    
+    flukeInd = find(isFluke);
+    flukeNum = numel(flukeInd);
+    
+    indCell = cell(flukeNum,1);
+    timeCell = cell(flukeNum, 1);
+    begEndInd = nan(flukeNum, 2);
 
+    for iFluke = 1:flukeNum
+        thisSegNum = flukeInd(iFluke);
+        begEndInd(iFluke, :) = Seg.begEndInd(thisSegNum, :);
+        indCell{iFluke} = (segBeg(thisSegNum):segEnd(thisSegNum))';
+        timeCell{iFluke} = timeHour(segBeg(thisSegNum):segEnd(thisSegNum));
+    end
+
+    Fluke.begEndInd = begEndInd;
+    Fluke.indCell = indCell;
+    Fluke.timeCell = timeCell;
+    Fluke.num = flukeNum;
 end

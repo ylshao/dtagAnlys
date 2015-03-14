@@ -2,11 +2,12 @@ function EnctrSeg = getEnctr(TagData)
 
 % enctrAy rotate 90 deg, gravity on axis y
 % enctrAz gravity on axis z 
-dataLength = TagData.dataLength;
+% dataLength = TagData.dataLength;
 
-SurfStat = TagData.SegStat.SurfStat;
-totalAccelMean = SurfStat.totalAccelMean;
-totalAccelStd = SurfStat.totalAccelStd;
+Surf = TagData.DepthSeg.Surf;
+totalAccelMean = Surf.totalAccelMean;
+totalAccelStd = Surf.totalAccelStd;
+timeHour = TagData.timeHour;
 
 THLD_ACCEL_Y_MEAN = 0.02;
 THLD_ACCEL_Z_MEAN = 0.02;
@@ -17,36 +18,40 @@ isEnctrAy = abs(abs(totalAccelMean(:, 2)) - 1) < THLD_ACCEL_Y_MEAN &...
         totalAccelStd(:,2) < THLD_ACCEL_Y_STD;
 isEnctrAz = abs(abs(totalAccelMean(:, 3)) - 1) < THLD_ACCEL_Z_MEAN &...
         totalAccelStd(:,3) < THLD_ACCEL_Z_STD;
-enctrAy = find(isEnctrAy);
-enctrAz = find(isEnctrAz);
 
-enctrAySel = nan(dataLength, 1);
-enctrAzSel = nan(dataLength, 1);
+FlatAy = getEnctrSeg(isEnctrAy, Surf, timeHour);
+FlatAz = getEnctrSeg(isEnctrAz, Surf, timeHour);
 
-THLD_SEG_LENGTH = 25;%TagData(1).sampleFreq;
-surfBeg = TagData.DepthSeg.surfBeg;
-surfEnd = TagData.DepthSeg.surfEnd;
-for iEncAy = 1:numel(enctrAy)
-    thisSeg = surfBeg(enctrAy(iEncAy)):surfEnd(enctrAy(iEncAy));
-    if numel(thisSeg) >= THLD_SEG_LENGTH
-    enctrAySel(thisSeg) = ...
-        ones(surfEnd(enctrAy(iEncAy)) - surfBeg(enctrAy(iEncAy)) + 1, 1);
-    end
+EnctrSeg.FlatAy = FlatAy;
+EnctrSeg.FlatAz = FlatAz;
+
+enctrNumSum = EnctrSeg.FlatAy.num + EnctrSeg.FlatAz.num;
+fprintf('\nNum of encounters find %d\nflatAy Num %d, flatAz Num %d\n',...
+    enctrNumSum, EnctrSeg.FlatAy.num, EnctrSeg.FlatAz.num)
 end
-enctrAySeg = find(~isnan(enctrAySel));
 
-for iEncAz = 1:numel(enctrAz)
-    thisSeg = surfBeg(enctrAz(iEncAz)):surfEnd(enctrAz(iEncAz));
-    if numel(thisSeg) >= THLD_SEG_LENGTH
-    enctrAzSel(thisSeg) = ...
-        ones(surfEnd(enctrAz(iEncAz)) - surfBeg(enctrAz(iEncAz)) + 1, 1);
+function Seg = getEnctrSeg(isEnctr, Surf, timeHour)
+    enctr = find(isEnctr);
+    enctrNum = numel(enctr);
+    segBeg = Surf.begEndInd(:,1);
+    segEnd = Surf.begEndInd(:,2);
+    indCell = cell(enctrNum,1);
+    timeCell = cell(enctrNum, 1);
+    begEndInd = nan(enctrNum, 2);
+    
+    THLD_SEG_LENGTH = 25;%TagData(1).sampleFreq;
+
+    for iEnc = 1:enctrNum
+        thisSegNum = enctr(iEnc);
+        thisSeg = segBeg(thisSegNum):segEnd(thisSegNum);
+        if numel(thisSeg) >= THLD_SEG_LENGTH
+            begEndInd(iEnc, :) = Surf.begEndInd(thisSegNum);
+            indCell{iEnc} = (segBeg(thisSegNum):segEnd(thisSegNum))';
+            timeCell{iEnc} = timeHour(segBeg(thisSegNum):segEnd(thisSegNum));
+        end
     end
-end
-enctrAzSeg = find(~isnan(enctrAzSel));
-
-EnctrSeg.enctrAySeg = enctrAySeg;
-EnctrSeg.enctrAzSeg = enctrAzSeg;
-EnctrSeg.enctrAySel = enctrAySel;
-EnctrSeg.enctrAzSel = enctrAzSel;
-
+    Seg.begEndInd = begEndInd;
+    Seg.indCell = indCell;
+    Seg.timeCell = timeCell;
+    Seg.num = enctrNum;
 end

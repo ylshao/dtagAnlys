@@ -59,6 +59,7 @@ surfSeg = unique([surfSeg; increSurfSeg]);
 %% Find Descent, Ascent and Bottom Segments
 pitchDeg = TagData.pitchDeg;
 dataLength = TagData.dataLength;
+timeHour = TagData.timeHour;
 
 descBeg = surfEnd+1; % add one index so that the two are not the same
 descEnd = nan(surfNum, 1);
@@ -67,8 +68,8 @@ ascBeg = nan(surfNum, 1);
 % define the criteria for descend end and ascend begin
 DESC_END_PITCH_DEG = 0; % if pitch exceeds 5 degrees, descent ends
 ASC_BEG_PITCH_DEG = 0;
-ascBeg(1) = find(pitchDeg(1:ascEnd(1)-1) < ASC_BEG_PITCH_DEG, 1, 'last'); % the last time that pitch still has negative value
-descEnd(end) = find(pitchDeg(descBeg(end)+1:end) > DESC_END_PITCH_DEG, 1, 'first') + surfEnd(end) - 1; % the first time that pitch becomes positive
+ascBeg(1) = find(pitchDeg(1:surfBeg(1)) < ASC_BEG_PITCH_DEG, 1, 'last'); % the last time that pitch still has negative value
+descEnd(end) = find(pitchDeg(surfEnd(end):end) > DESC_END_PITCH_DEG, 1, 'first') + surfEnd(end) - 1; % the first time that pitch becomes positive
 if isempty(ascBeg(1)); ascBeg(1) = ascEnd(1); end
 if isempty(descEnd(end)); descEnd(end) = descBeg(end); end
 
@@ -93,35 +94,21 @@ for iSeg = 1:(surfNum-1)
 end
 botBeg = descEnd(1:(end-1))+1;
 botEnd = ascBeg(2:end)-1;
-[descSeg, descSegCell] = collectSeg(dataLength, descBeg, descEnd);
-[ascSeg, ascSegCell] = collectSeg(dataLength, ascBeg, ascEnd);
-[botSeg, botSegCell] = collectSeg(dataLength, botBeg, botEnd);
+Surf = collectSeg(surfBeg, surfEnd, timeHour);
+Desc = collectSeg(descBeg, descEnd, timeHour);
+Asc = collectSeg(ascBeg, ascEnd, timeHour);
+Bot = collectSeg(botBeg, botEnd, timeHour);
 %% Construct the output
-DepthSeg.surf = [surfBeg surfEnd];
-DepthSeg.surfBeg = surfBeg;
-DepthSeg.surfEnd = surfEnd;
-DepthSeg.surfSeg = surfSeg;
-DepthSeg.desc = [descBeg descEnd];
-DepthSeg.descSeg = descSeg;
-DepthSeg.descBeg = descBeg;
-DepthSeg.descEnd = descEnd;
-DepthSeg.asc = [ascBeg ascEnd];
-DepthSeg.ascSeg = ascSeg;
-DepthSeg.ascBeg = ascBeg;
-DepthSeg.ascEnd = ascEnd;
-DepthSeg.bot = [botBeg botEnd];
-DepthSeg.botSeg = botSeg;
-DepthSeg.botBeg = botBeg;
-DepthSeg.botEnd = botEnd;
-DepthSeg.botSegCell = botSegCell;
-DepthSeg.ascSegCell = ascSegCell;
-DepthSeg.descSegCell = descSegCell;
+DepthSeg.Surf = Surf;
+DepthSeg.Asc = Asc;
+DepthSeg.Desc = Desc;
+DepthSeg.Bot = Bot;
 fprintf('\nfind seg num %d\n', surfNum)
 %% Sanity Check
-sanityCheckNan(DepthSeg.asc, 'asc')
-sanityCheckNan(DepthSeg.desc, 'desc')
-sanityCheckNan(DepthSeg.surf, 'surf')
-sanityCheckNan(DepthSeg.bot, 'bot')
+sanityCheckNan(DepthSeg.Asc.begEndInd, 'asc')
+sanityCheckNan(DepthSeg.Desc.begEndInd, 'desc')
+sanityCheckNan(DepthSeg.Surf.begEndInd, 'surf')
+sanityCheckNan(DepthSeg.Bot.begEndInd, 'bot')
 
 sanityCheckRev(ascBeg, ascEnd, 'Asc Beg & Asc End')
 sanityCheckRev(ascEnd, surfBeg, 'Asc End & Surf Beg')
@@ -144,9 +131,9 @@ function [surfBeg, surfEnd, surfNum] = getSurfSeg(surfSeg)
     surfNum = numel(surfBeg); % surfNum = descNum = ascNum = botNum+1
 end
 
-function sanityCheckNan(seg, txt)
-    segBegNanNum = numel(find(isnan(seg(:,1))));
-    segEndNanNum = numel(find(isnan(seg(:,2))));
+function sanityCheckNan(begEndInd, txt)
+    segBegNanNum = numel(find(isnan(begEndInd(:,1))));
+    segEndNanNum = numel(find(isnan(begEndInd(:,2))));
     if segBegNanNum ~= 0 || segEndNanNum ~= 0
     fprintf('%sBeg nan %d, %sEnd nan %d\n', txt, segBegNanNum, txt, segEndNanNum);
     end
@@ -161,26 +148,18 @@ function sanityCheckRev(segBeg, segEnd, txt)
     end
 end
 
-function [seg, segCell] = collectSeg(length, segBeg, segEnd)
-% [time_pks, data_pks] = getPeaks(time, data, thld_rub, thld_zero, loc_min_flag)
-%   The function searches through all the data points to find local peaks.
-%   A rubbish bound is defined, start from previous peak, only points
-%   exceed the rubbish bound will be considered as possible peaks.
-%
-%   thld_rub threshold to decide a the rubbish bound
-%       0: find all trivial peaks
-%   thld_zero threshold to decide a small amplitude peak
-%       0: keep all small data
-%   loc_min_flag determine which peak to find 
-%       1: find local maxima & minima, 0: only find local maxima
-segCell = cell(numel(segBeg),1);
-segSel = nan(length, 1);
+function Seg = collectSeg(segBeg, segEnd, timeHour)
+indCell = cell(numel(segBeg),1);
+timeCell = cell(numel(segBeg), 1);
 for iSeg = 1:numel(segBeg)
     if ~isnan(segBeg(iSeg)) && ~isnan(segEnd(iSeg))
-        segSel(segBeg(iSeg):segEnd(iSeg)) = ...
-        ones(segEnd(iSeg) - segBeg(iSeg) + 1, 1);
-        segCell{iSeg} = (segBeg(iSeg):segEnd(iSeg))';
+        indCell{iSeg} = (segBeg(iSeg):segEnd(iSeg))';
+        timeCell{iSeg} = timeHour(segBeg(iSeg):segEnd(iSeg));
     end    
 end
-seg = find(~isnan(segSel));
+
+Seg.begEndInd = [segBeg segEnd];
+Seg.indCell = indCell;
+Seg.timeCell = timeCell;
+Seg.num = numel(segBeg);
 end

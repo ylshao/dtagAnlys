@@ -41,6 +41,7 @@ function [time_pks, data_pks, indPeak] = getPeaks(time, data, thld_rub, thld_zer
     if numel(data) < 5
         time_pks = nan;
         data_pks = nan;
+        indPeak = nan;
     else
         cur_ind = 1;
         trend = 0;
@@ -49,6 +50,7 @@ function [time_pks, data_pks, indPeak] = getPeaks(time, data, thld_rub, thld_zer
         indPeak_m = [1; nan(length(data), 1)];
         time_pks = [];
         data_pks = [];
+        indPeak = [];
         ind = 2;
         while cur_ind < length(data)
             data_cur = data(cur_ind); % 

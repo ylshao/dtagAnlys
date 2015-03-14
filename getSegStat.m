@@ -1,4 +1,4 @@
-function SegStat = getSegStat(DepthSeg, TagData)
+function DepthSeg = getSegStat(TagData)
 % [time_pks, data_pks] = getPeaks(time, data, thld_rub, thld_zero, loc_min_flag)
 %   The function searches through all the data points to find local peaks.
 %   A rubbish bound is defined, start from previous peak, only points
@@ -10,36 +10,29 @@ function SegStat = getSegStat(DepthSeg, TagData)
 %       0: keep all small data
 %   loc_min_flag determine which peak to find 
 %       1: find local maxima & minima, 0: only find local maxima
+DepthSeg = TagData.DepthSeg;
 
-surfBeg = DepthSeg.surf(:,1);
-surfEnd = DepthSeg.surf(:,2);
-descBeg = DepthSeg.desc(:,1);
-descEnd = DepthSeg.desc(:,2);
-ascBeg = DepthSeg.asc(:,1);
-ascEnd = DepthSeg.asc(:,2);
-botBeg = DepthSeg.bot(:,1);
-botEnd = DepthSeg.bot(:,2);
+DepthSeg.Surf = calcStat(TagData, DepthSeg.Surf);
+DepthSeg.Desc = calcStat(TagData, DepthSeg.Desc);
+DepthSeg.Asc = calcStat(TagData, DepthSeg.Asc); 
+DepthSeg.Bot = calcStat(TagData, DepthSeg.Bot);
 
 
-SegStat.SurfStat = calcStat(TagData, surfBeg, surfEnd);
-SegStat.DescStat = calcStat(TagData, descBeg, descEnd);
-SegStat.AscStat = calcStat(TagData, ascBeg, ascEnd); 
-SegStat.BotStat = calcStat(TagData, botBeg, botEnd);
-SegStat.DescStat.time = TagData.timeHour(DepthSeg.descSeg); 
-SegStat.BotStat.time = TagData.timeHour(botBeg); 
 %%
 end
 %
-function Stat = calcStat(TagData, segBeg, segEnd)
+function Seg = calcStat(TagData, Seg)
+
+    segBeg = Seg.begEndInd(:,1);
+    segEnd = Seg.begEndInd(:,2);
 
 surfNum = numel(segBeg);
 sampleFreq = TagData.sampleFreq;
-accelX = TagData.accelTagOrig(:,1); % use ax
+accelX = TagData.accelTag(:,1); % use ax
 
 % initialize
 peakFreq = nan(surfNum, 1);
 mainAmp = nan(surfNum, 1);
-AccelDetail = TagData.AccelStat;
 odbaMean = nan(surfNum, 1);
 statAccelMean = nan(surfNum, 3);
 statAccelStd = nan(surfNum, 3);
@@ -70,7 +63,6 @@ for iSeg = 1:surfNum
         
     % get AccelStat
     thisAccelStat = getAccelStat(TagData, thisSeg);
-    AccelDetail(iSeg, 1) = thisAccelStat;
     odbaMean(iSeg) = mean(thisAccelStat.odba);
     statAccelMean(iSeg, :) = mean(thisAccelStat.staticAccel);
     statAccelStd(iSeg, :) = std(thisAccelStat.staticAccel);
@@ -91,14 +83,13 @@ for iSeg = 1:surfNum
 end
 
 %%
-Stat.peakFreq = peakFreq;
-Stat.mainAmp = mainAmp;
-Stat.AccelDetail = AccelDetail;
-Stat.odbaMean = odbaMean;
-Stat.statAccelMean = statAccelMean;
-Stat.statAccelStd = statAccelStd;
-Stat.totalAccelMean = totalAccelMean;
-Stat.totalAccelStd = totalAccelStd;
+Seg.peakFreq = peakFreq;
+Seg.mainAmp = mainAmp;
+Seg.odbaMean = odbaMean;
+Seg.statAccelMean = statAccelMean;
+Seg.statAccelStd = statAccelStd;
+Seg.totalAccelMean = totalAccelMean;
+Seg.totalAccelStd = totalAccelStd;
 end
 
 

@@ -1,44 +1,31 @@
 function GlideSeg = getGlide(TagData)
 
 
-flukeAsc = TagData.FlukeSeg.flukeAsc;
-flukeDesc = TagData.FlukeSeg.flukeDesc;
-flukeBot = TagData.FlukeSeg.flukeBot;
+FlukeSeg = TagData.FlukeSeg;
 
-flukeDescNum = TagData.FlukeSeg.flukeDescNum;
-flukeAscNum = TagData.FlukeSeg.flukeAscNum;
-flukeBotNum = TagData.FlukeSeg.flukeBotNum;
-[glideBot, glideBotSeg, glideBotNum] = getGlideSeg(TagData, flukeBot, flukeBotNum);
-[glideAsc, glideAscSeg, glideAscNum] = getGlideSeg(TagData, flukeAsc, flukeAscNum);
-[glideDesc, glideDescSeg, glideDescNum] = getGlideSeg(TagData, flukeDesc, flukeDescNum);
+Bot = getGlideSeg(TagData, FlukeSeg.Bot);
+Asc = getGlideSeg(TagData, FlukeSeg.Asc);
+Desc = getGlideSeg(TagData, FlukeSeg.Desc);
 
 
 %%
 
-GlideSeg.glideBot = glideBot;
-GlideSeg.glideAsc = glideAsc;
-GlideSeg.glideDesc = glideDesc;
-
-GlideSeg.glideBotSeg = glideBotSeg;
-GlideSeg.glideAscSeg = glideAscSeg;
-GlideSeg.glideDescSeg = glideDescSeg;
-
-GlideSeg.glideBotNum = glideBotNum;
-GlideSeg.glideAscNum = glideAscNum;
-GlideSeg.glideDescNum = glideDescNum;
-
+GlideSeg.Desc = Desc;
+GlideSeg.Asc = Asc;
+GlideSeg.Bot = Bot;
 %%
 fprintf('\n')
-fprintf('bottom found glide %d, fluke seg %d\n', glideBotNum, flukeBotNum)
-fprintf('desc found glide %d, fluke seg %d\n', glideDescNum, flukeDescNum)
-fprintf('asc found glide %d, fluke seg %d\n', glideAscNum, flukeAscNum)
+fprintf('bottom found glide %d, fluke seg %d\n', Bot.glideNum, FlukeSeg.Bot.num)
+fprintf('desc found glide %d, fluke seg %d\n',  Desc.glideNum, FlukeSeg.Desc.num)
+fprintf('asc found glide %d, fluke seg %d\n', Asc.glideNum, FlukeSeg.Asc.num)
 end
 
-function [glide, glideSeg, glideSegNum] = getGlideSeg(TagData, fluke, flukeNum)
+function Glide = getGlideSeg(TagData, Seg)
     timeHour = TagData.timeHour;
     accelX = TagData.accelTagOrig(:,1); 
     dataLength = TagData.dataLength;
-    
+    fluke = Seg.begEndInd;
+    flukeNum = Seg.num;
     FREQ_AVRG = 0.7882;
     MIN_LEN = 2/FREQ_AVRG/3600;
     THLD_RUB_GLIDE = 0.2;
@@ -79,5 +66,10 @@ function [glide, glideSeg, glideSegNum] = getGlideSeg(TagData, fluke, flukeNum)
         if (glideLen == 0); glide(iFluke+1, 4) = {nan}; end
     end
     glideSeg = find(~isnan(glideSel));
+    
+   	Glide.glide = glide;
+    Glide.glideSeg = glideSeg;
+    Glide.glideNum = glideSegNum;
+    
 end
 

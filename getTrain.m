@@ -2,7 +2,7 @@ function TrainSeg = getTrain(TagData)
 
 timeHour = TagData.timeHour;
 headDeg = TagData.headDeg;
-dataLength = TagData.dataLength;
+% dataLength = TagData.dataLength;
 THLD_RUB_HEAD_DEG = 30;
 [timeHeadPeak, headPeak, indPeak] = getPeaks(timeHour, headDeg, THLD_RUB_HEAD_DEG);
 % figure;
@@ -12,8 +12,10 @@ THLD_RUB_HEAD_DEG = 30;
 
 
 %% concat depth segments
-concatSegMat = [TagData.DepthSeg.asc TagData.DepthSeg.surf ...
-        TagData.DepthSeg.desc [TagData.DepthSeg.bot; nan nan] ];
+concatSegMat = [TagData.DepthSeg.Asc.begEndInd...
+            TagData.DepthSeg.Surf.begEndInd ...
+            TagData.DepthSeg.Desc.begEndInd ...
+            [TagData.DepthSeg.Bot.begEndInd; nan nan] ];
 concatSegArray = reshape(concatSegMat', [], 1);    
 
 
@@ -28,9 +30,9 @@ MIN_SEG_NUM = 4; % minimal segments shall contain
 MAX_SEG_NUM = 10; 
 MIN_HEAD_DEG = 350; % over this value means rotate 1 circle
 MAX_DIFF_HEAD_DEG = 20; % head degree should change smoothly during training
-
-trainSel = nan(dataLength, 1);
+    
 indPeakNum = numel(indPeak);
+isTrain = nan(indPeakNum-1, 1);
 trainSegNum = 0;
 if mod(indPeakNum, 2) ~= 0 
     indPeakNum = indPeakNum - 1;
@@ -52,26 +54,41 @@ for iPeak = 1:(indPeakNum-1)
     peakSegDiff = peakSegEnd-peakSegBeg;
     
     % judge whether or not isTrain
-    isTrain = peakSegDiff >= MIN_SEG_NUM & peakSegDiff <= MAX_SEG_NUM & ...
+    thisTrain = peakSegDiff >= MIN_SEG_NUM & peakSegDiff <= MAX_SEG_NUM & ...
             headPeakDiff > MIN_HEAD_DEG;
     if ~isempty(find(thisHeadDiffAbs > MAX_DIFF_HEAD_DEG, 1, 'first'))
-        isTrain = 0;
+        thisTrain = 0;
     end
-    
-    % select index in trainSel
-    thisSeg = thisPeakBeg:thisPeakEnd;
-    if isTrain
-        trainSel(thisSeg) = ones(thisPeakEnd - thisPeakBeg + 1, 1);
-        trainSegNum = trainSegNum + 1;
+    if thisTrain == 1
+        isTrain(iPeak) = thisTrain;
     end
+%     % select index in trainSel
+%     thisSeg = thisPeakBeg:thisPeakEnd;
+%     if isTrain(iPeak)
+%         trainSel(thisSeg) = ones(thisPeakEnd - thisPeakBeg + 1, 1);
+%         trainSegNum = trainSegNum + 1;
+%     end
 end
-trainSeg = find(~isnan(trainSel));
-
+% trainSeg = find(~isnan(trainSel));
+     
+trainInd = find(~isnan(isTrain));
+trainNum = numel(trainInd);
+    indCell = cell(trainNum,1);
+    timeCell = cell(trainNum, 1);
+    begEndInd = nan(trainNum, 2);
+for iTrain = 1:trainNum
+    thisPeakBeg = indPeak(trainInd(iTrain));
+    thisPeakEnd = indPeak(trainInd(iTrain)+1);
+    begEndInd(iTrain, :) = [thisPeakBeg thisPeakEnd];
+    indCell{iTrain} = (thisPeakBeg:thisPeakEnd)';
+    timeCell{iTrain} = timeHour(thisPeakBeg:thisPeakEnd);
+end
 %%
-TrainSeg.trainSeg = trainSeg;
-TrainSeg.trainSel = trainSel;
-TrainSeg.trainSegNum = trainSegNum;
 
+    TrainSeg.begEndInd = begEndInd;
+    TrainSeg.indCell = indCell;
+    TrainSeg.timeCell = timeCell;
+    TrainSeg.num = trainNum;
 %%
-fprintf('\nfind trainning segments %d\n', trainSegNum)
+fprintf('\nfind trainning segments %d\n', trainNum)
 end

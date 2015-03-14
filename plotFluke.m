@@ -2,46 +2,44 @@ function plotFluke(TagData)
 
 %%
 
-accelX = TagData.accelTagOrig(:,1);
+accelX = TagData.accelTag(:,1);
 pitchDeg = TagData.pitchDeg;
+timeHour = TagData.timeHour;
+depthShiftFilt = TagData.depthShiftFilt;
+FlukeSeg = TagData.FlukeSeg;
+DepthSeg = TagData.DepthSeg;
+
 figure; ax = [];
 ax(1) = subplot(311); 
-plot(TagData.timeHour, TagData.depthShiftFilt, 'b'); hold on
-plot(TagData.timeHour(TagData.DepthSeg.surfSeg),...
-    TagData.depthShiftFilt(TagData.DepthSeg.surfSeg), 'r.');
-plot(TagData.timeHour(TagData.DepthSeg.descSeg),...
-    TagData.depthShiftFilt(TagData.DepthSeg.descSeg), 'c.');
-plot(TagData.timeHour(TagData.DepthSeg.ascSeg),...
-    TagData.depthShiftFilt(TagData.DepthSeg.ascSeg), 'g.');
-plot(TagData.timeHour(TagData.DepthSeg.botSeg),...
-    TagData.depthShiftFilt(TagData.DepthSeg.botSeg), 'm.');
+plot(TagData.timeHour, TagData.depthShiftFilt, 'b'); hold on; 
+plotSegFromCell(timeHour, depthShiftFilt, DepthSeg.Surf, 'r.')
+plotSegFromCell(timeHour, depthShiftFilt, DepthSeg.Desc, 'c.')
+plotSegFromCell(timeHour, depthShiftFilt, DepthSeg.Asc, 'g.')
+plotSegFromCell(timeHour, depthShiftFilt, DepthSeg.Bot, 'm.')
 xlabel('time [hour]'); ylabel('depth')
 legend('orig', 'surf', 'desc', 'asc')
-hold on; 
+
 ax(2) = subplot(312);
-plot(TagData.timeHour, accelX)
-hold on; 
-plot(TagData.timeHour, zeros(numel(TagData.timeHour), 1), 'k--')
-plot(TagData.timeHour(TagData.FlukeSeg.flukeDescSeg),...
-    accelX(TagData.FlukeSeg.flukeDescSeg), 'r.');
-plot(TagData.timeHour(TagData.FlukeSeg.flukeAscSeg),...
-    accelX(TagData.FlukeSeg.flukeAscSeg), 'r.');
-plot(TagData.timeHour(TagData.FlukeSeg.flukeBotSeg),...
-    accelX(TagData.FlukeSeg.flukeBotSeg), 'r.');
+plot(TagData.timeHour, accelX); hold on; 
+plotSegFromCell(timeHour, accelX, FlukeSeg.Desc, 'c.')
+plotSegFromCell(timeHour, accelX, FlukeSeg.Asc, 'g.')
+plotSegFromCell(timeHour, accelX, FlukeSeg.Bot, 'm.')
 xlabel('time [hour]'); ylabel('accel X [m/s^2]')
 
 ax(3) = subplot(313);
-plot(TagData.timeHour, pitchDeg)
-hold on; 
+plot(TagData.timeHour, pitchDeg); hold on; 
 plot(TagData.timeHour, zeros(numel(TagData.timeHour), 1), 'k--')
-plot(TagData.timeHour(TagData.FlukeSeg.flukeDescSeg),...
-    pitchDeg(TagData.FlukeSeg.flukeDescSeg), 'r.');
-plot(TagData.timeHour(TagData.FlukeSeg.flukeAscSeg),...
-    pitchDeg(TagData.FlukeSeg.flukeAscSeg), 'r.');
-plot(TagData.timeHour(TagData.FlukeSeg.flukeBotSeg),...
-    pitchDeg(TagData.FlukeSeg.flukeBotSeg), 'r.');
+plotSegFromCell(timeHour, pitchDeg, FlukeSeg.Desc, 'c.')
+plotSegFromCell(timeHour, pitchDeg, FlukeSeg.Asc, 'g.')
+plotSegFromCell(timeHour, pitchDeg, FlukeSeg.Bot, 'm.')
 xlabel('time [hour]'); ylabel('pitch [deg]')
 
 linkaxes(ax, 'x')
 
+end
+
+
+function plotSegFromCell(time, Data, Seg, color)
+plot(time(cell2mat(Seg.indCell)),...
+    Data(cell2mat(Seg.indCell)), color);
 end

@@ -1,25 +1,13 @@
 clear all
 clc
-% cd('C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\DTAG\dataAnlys')
-% addpath(genpath('C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\DTAG\dataAnlys'))
-% addpath(genpath('C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\DTAG\dataOffline'))
+
 %%
-% % recdir = 'C:\Users\shaoy\Documents\MATLAB\Archive\Dropbox\SpeedSensor\DTAG\Data';
-% prefix = 'tt13_268a';
-% % prefix = 'OrientTest105';
-% % prefix = 'PandR106';
-% filename = sprintf('%s_Data.mat', prefix);
-% if exist(filename, 'file')
-%     load(filename); % load .mat with only A, M, p if pitch roll head data unavailable
-%     fname = sprintf('%sprh%d.mat',prefix,round(fs));
-%     if exist(fname, 'file')
-%         load(fname); % load .mat with extra pitch roll head if the prh file exists
-%     end
-% end
-% %%
 % tempFeb24
-% load('dataMar7')
-TagData = shiftDepth(TagData, nTagData, 'interp')
+load('dataMar11')
+TagData = TagData268; nTagData = 1;
+%% Shift Depth to Zero
+TagData = shiftDepth(TagData, nTagData, 'interp');
+
 %% Moving Average
 rawData = TagData(1).depthShift;
 avrgWindow = 10;
@@ -37,8 +25,7 @@ TagData(1).depthShiftFilt = filtData;
 %% divide data into segments based on diving phases
 % change: better way to divide segment, e.g. too long for bottom swimming;
 
-DepthSeg = getSeg(TagData(1));
-TagData(1).DepthSeg = DepthSeg;
+TagData(1).DepthSeg = getSeg(TagData(1));
 plotSeg(TagData(1))
 
 %% get statical data
@@ -48,41 +35,34 @@ plotSeg(TagData(1))
 %         the cut peak is p2p or peak? comment clearly;
 %         already selected flukes, average the fft
 tic;
-TagData(1).AccelStat = getOdba(TagData);
+TagData(1).AccelStat = getOdba(TagData(1));
 % plotStaAccel(TagData(1))
-SegStat = getSegStat(DepthSeg, TagData(1));
-TagData(1).SegStat = SegStat;
+TagData(1).DepthSeg = getSegStat(TagData(1));
 toc
 
 %% Get fluke segments
 % change: better way to estimate freq and amp;
 
 % define the criteria for flukes
-freqAvrg = 0.7882; freqStd = 2*0.1255;
-ampAvrg = 0.25; ampStd = 0.05;
+FREQ_AVRG = 0.7882; FREQ_STD = 2*0.1255;
+AMP_AVRG = 0.25; AMP_STD = 0.05;
 FlukeThld = struct;
-FlukeThld.minFreq = freqAvrg-freqStd; FlukeThld.maxFreq = freqAvrg+freqStd;
-FlukeThld.minAmp = ampAvrg-ampStd; FlukeThld.maxAmp = ampAvrg+ampStd;
+FlukeThld.minFreq = FREQ_AVRG-FREQ_STD; FlukeThld.maxFreq = FREQ_AVRG+FREQ_STD;
+FlukeThld.minAmp = AMP_AVRG-AMP_STD; FlukeThld.maxAmp = AMP_AVRG+AMP_STD;
 
 % find flukes
-FlukeSeg = getFluke(DepthSeg, SegStat, TagData, FlukeThld);
-TagData(1).FlukeSeg = FlukeSeg;
+TagData(1).FlukeSeg = getFluke(TagData, FlukeThld);
 plotFluke(TagData(1))
 %% Get glide
-GlideSeg = getGlide(TagData(1));
-TagData(1).GlideSeg = GlideSeg;
-% plotGlide(TagData(1))
+TagData(1).GlideSeg = getGlide(TagData(1));
+plotGlide(TagData(1))
 %% Get encounter
 % change: need to improve the detection of surface
-
-EnctrSeg = getEnctr(TagData);
-TagData(1).EnctrSeg = EnctrSeg;
+TagData(1).EnctrSeg = getEnctr(TagData);
 plotEnctr(TagData(1))
 
 %% Get training
-TrainSeg = getTrain(TagData);
-TagData(1).TrainSeg = TrainSeg;
-
+TagData(1).TrainSeg = getTrain(TagData);
 plotTrain(TagData(1))
 %% hist portion of each segments
 % thisFigNum = randi([1000 2000]);
