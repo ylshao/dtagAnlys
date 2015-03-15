@@ -66,8 +66,6 @@ TagData(1).TrainSeg = getTrain(TagData);
 plotTrain(TagData(1))
 %% hist portion of each segments
 % thisFigNum = randi([1000 2000]);
-
-
 postProcess(TagData(1))
 
 %% histogram all the fluke freq and peaks, relation with desc/asc/bot

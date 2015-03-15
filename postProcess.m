@@ -5,31 +5,30 @@ FlukeSeg = TagData.FlukeSeg;
 GlideSeg = TagData.GlideSeg;
 EnctrSeg = TagData.EnctrSeg;
 TrainSeg = TagData.TrainSeg;
-dataLength =TagData.dataLength; 
+dataLength = TagData.dataLength; 
 
-flukeAsc = FlukeSeg.flukeAsc;
-flukeBot = FlukeSeg.flukeBot;
-flukeDesc = FlukeSeg.flukeDesc;
+flukeAsc = FlukeSeg.Asc.begEndInd;
+flukeBot = FlukeSeg.Bot.begEndInd;
+flukeDesc = FlukeSeg.Desc.begEndInd;
 
 thisFigNum = 1632;
 %% Percent of each events over all deployment
 
-
-glideAscPct = numel(GlideSeg.glideAscSeg)/dataLength;
-glideBotPct = numel(GlideSeg.glideBotSeg)/dataLength;
-glideDescPct = numel(GlideSeg.glideDescSeg)/dataLength;
+glideAscPct = numel(GlideSeg.Asc.glideSeg)/dataLength;
+glideBotPct = numel(GlideSeg.Bot.glideSeg)/dataLength;
+glideDescPct = numel(GlideSeg.Desc.glideSeg)/dataLength;
 glidePct = glideBotPct + glideAscPct + glideDescPct;
 
-flukeAscPct = numel(FlukeSeg.flukeAscSeg)/dataLength - glideAscPct;
-flukeBotPct = numel(FlukeSeg.flukeBotSeg)/dataLength - glideBotPct;
-flukeDescPct = numel(FlukeSeg.flukeDescSeg)/dataLength - glideDescPct;
+flukeAscPct = numel(cell2mat(FlukeSeg.Asc.indCell))/dataLength - glideAscPct;
+flukeBotPct = numel(cell2mat(FlukeSeg.Bot.indCell))/dataLength - glideBotPct;
+flukeDescPct = numel(cell2mat(FlukeSeg.Desc.indCell))/dataLength - glideDescPct;
 flukePct = flukeDescPct + flukeAscPct + flukeBotPct;
 
-enctrAyPct = numel(EnctrSeg.enctrAySeg)/dataLength;
-enctrAzPct = numel(EnctrSeg.enctrAzSeg)/dataLength;
+enctrAyPct = numel(cell2mat(EnctrSeg.FlatAy.indCell))/dataLength;
+enctrAzPct = numel(cell2mat(EnctrSeg.FlatAz.indCell))/dataLength;
 enctrPct = enctrAyPct + enctrAzPct;
 
-trainPct = numel(TrainSeg.trainSeg)/dataLength;
+trainPct = numel(cell2mat(TrainSeg.indCell))/dataLength;
 
 unknownPct = 1 - flukePct - enctrPct - trainPct - glidePct;
 
@@ -37,7 +36,7 @@ segPct = [flukePct, glidePct, enctrPct, trainPct];
 
 figure(thisFigNum); clf; thisFigNum = thisFigNum+1;
 bar(segPct)
-title('Event Length')
+title('Event Length/Data Length')
 xlabel('Events'), ylabel('Percent [%]')
 xTickLabel = [{'fluke'}; {'glide'}; {'encounter'}; {'training'}; {'unknown'}];
 set(gca,'XTick', 1:numel(xTickLabel), 'XTickLabel', xTickLabel)
@@ -56,6 +55,7 @@ segPctStack = [flukeAscOva flukeBotOva flukeDescOva;
         
 figure(thisFigNum); clf; thisFigNum = thisFigNum+1;
 bar(segPctStack, 'hist')
+title('Percent of Fluke & Glide during Swimming')
 xlabel('Events'), ylabel('Percent [%]')
 xTickLabel = [{'fluke'}; {'glide'}];
 set(gca,'XTick', 1:numel(xTickLabel), 'XTickLabel', xTickLabel)
@@ -87,12 +87,12 @@ swimDurStd = [swimAscDurStd swimBotDurStd swimDescDurStd];
 figure(thisFigNum); clf; thisFigNum = thisFigNum+1;
 xTickLabel = [{'Asc'}; {'Bot'}; {'Desc'}];
 errorbarMod(swimDurAvrg, swimDurStd, xTickLabel)
-title('swimming duration')
-xlabel('Segment'), ylabel('Avrg Duration [sec]')
+title('Average duration of swimming (fluke+glide)')
+xlabel('Interval'), ylabel('Avrg Duration [sec]')
 %% duty factor avrg and std
-dutyFacAsc = cell2mat(GlideSeg.glideAsc(2:end,4));
-dutyFacBot = cell2mat(GlideSeg.glideBot(2:end,4));
-dutyFacDesc = cell2mat(GlideSeg.glideDesc(2:end,4));
+dutyFacAsc = cell2mat(GlideSeg.Asc.glide(2:end,4));
+dutyFacBot = cell2mat(GlideSeg.Bot.glide(2:end,4));
+dutyFacDesc = cell2mat(GlideSeg.Desc.glide(2:end,4));
 
 dutyFacAscAvrg = nanmean(dutyFacAsc);
 dutyFacBotAvrg = nanmean(dutyFacBot);
@@ -110,28 +110,28 @@ dutyFacStd = [dutyFacAscStd dutyFacBotStd dutyFacDescStd];
 figure(thisFigNum); clf; thisFigNum = thisFigNum+1;
 xTickLabel = [{'Asc'}; {'Bot'}; {'Desc'}];
 errorbarMod(dutyFacAvrg, dutyFacStd, xTickLabel)
-title('duty factor')
-xlabel('Segment'), ylabel('Avrg Duration [sec]')
+title('Average duty factor (glide/(glide+fluke))')
+xlabel('Interval'), ylabel('Avrg Duty Factor')
 
 % box plot
 figure(thisFigNum); clf; thisFigNum = thisFigNum+1;
 dataPlot = {dutyFacAsc; dutyFacBot; dutyFacDesc};
 xTickLabel = [{'Asc'}; {'Bot'}; {'Desc'}];
 boxplotMod(dataPlot, xTickLabel)
-title('duty factor')
-xlabel('Segment'), ylabel('Avrg Duty Factor')
+title('Average duty factor (glide/(glide+fluke))')
+xlabel('Interval'), ylabel('Avrg Duty Factor')
 % hist
 figure(thisFigNum); clf; thisFigNum = thisFigNum+1;
 h = histMod(dutyFacBot);
-title('bot duty factor hist')
+title('Bot duty factor hist')
 xlabel('Duty Factor'), ylabel('Numbers')
 set(h,'FaceColor',0.7*ones(1,3),'EdgeColor','k')
 
 %% odba
 
-flukeAscOdba = calcFlukeOdba(TagData, flukeAsc, FlukeSeg.flukeAscNum);
-flukeBotOdba = calcFlukeOdba(TagData, flukeBot, FlukeSeg.flukeBotNum);
-flukeDescOdba = calcFlukeOdba(TagData, flukeDesc, FlukeSeg.flukeDescNum);
+flukeAscOdba = calcFlukeOdba(TagData, flukeAsc, FlukeSeg.Asc.num);
+flukeBotOdba = calcFlukeOdba(TagData, flukeBot, FlukeSeg.Bot.num);
+flukeDescOdba = calcFlukeOdba(TagData, flukeDesc, FlukeSeg.Desc.num);
 
 flukeAscOdbaAvrg = nanmean(flukeAscOdba);
 flukeBotOdbaAvrg = nanmean(flukeBotOdba);
@@ -146,27 +146,28 @@ flukeOdbaStd = [flukeAscOdbaStd flukeBotOdbaStd flukeDescOdbaStd];
 figure(thisFigNum); clf; thisFigNum = thisFigNum+1;
 xTickLabel = [{'Asc'}; {'Bot'}; {'Desc'}];
 errorbarMod(flukeOdbaAvrg, flukeOdbaStd, xTickLabel)
-title('odba')
-xlabel('Segment'), ylabel('Avrg Odba [g]')
+title('Average Odba')
+xlabel('Interval'), ylabel('Avrg Odba [g]')
 
 % box plot
 figure(thisFigNum); clf; thisFigNum = thisFigNum+1;
 dataPlot = {flukeAscOdba; flukeBotOdba; flukeDescOdba};
 xTickLabel = [{'Asc'}; {'Bot'}; {'Desc'}];
 boxplotMod(dataPlot, xTickLabel)
-title('odba')
-xlabel('Segment'), ylabel('Avrg Odba [g]')
+title('Average Odba')
+xlabel('Interval'), ylabel('Avrg Odba [g]')
 
 % hist
 figure(thisFigNum); clf; thisFigNum = thisFigNum+1;
 h = histMod(flukeBotOdba);
-title('bot duty factor hist')
-xlabel('Duty Factor'), ylabel('Numbers')
+title('Bot Odba hist')
+xlabel('Odba [g]'), ylabel('Numbers')
 set(h,'FaceColor',0.7*ones(1,3),'EdgeColor','k')
+
 figure(thisFigNum); clf; thisFigNum = thisFigNum+1;
 h = histMod(flukeDescOdba);
-title('desc duty factor hist')
-xlabel('Duty Factor'), ylabel('Numbers')
+title('Desc Odba hist')
+xlabel('Odba [g]'), ylabel('Numbers')
 set(h,'FaceColor',0.7*ones(1,3),'EdgeColor','k')
 end
 
