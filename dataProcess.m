@@ -42,13 +42,7 @@ toc
 
 %% Get fluke segments
 % change: better way to estimate freq and amp;
-
 % define the criteria for flukes
-FREQ_AVRG = 0.7882; FREQ_STD = 2*0.1255;
-AMP_AVRG = 0.25; AMP_STD = 0.05;
-FlukeThld = struct;
-FlukeThld.minFreq = FREQ_AVRG-FREQ_STD; FlukeThld.maxFreq = FREQ_AVRG+FREQ_STD;
-FlukeThld.minAmp = AMP_AVRG-AMP_STD; FlukeThld.maxAmp = AMP_AVRG+AMP_STD;
 
 % find flukes
 TagData(1).FlukeSeg = getFluke(TagData, FlukeThld, 'fft');

@@ -64,3 +64,23 @@ plot(avrgWindowList/sampleFreq, odbaMeanList, '.--'); hold on
 xlabel('averaging window [sec]'); ylabel('ODBA [g]')
 
 
+%%
+nSelSegCell = numel(selSegCell);
+peakFreqArray = nan(nSelSegCell, 1);
+mainAmpArray = nan(nSelSegCell, 1);
+BIN_NUM = 4;
+for i = 1:nSelSegCell
+    time = timeHour(selSegCell{i});
+    data = accelTag(selSegCell{i},1);
+    thisPeakFreq = getDomFreq(data, sampleFreq, 0, 1);
+    thisMainAmp = getMainAmp(data, 1, BIN_NUM);
+    peakFreqArray(i) = thisPeakFreq;
+    mainAmpArray(i) = thisMainAmp;
+    figure; 
+    plot(time, data)
+end
+
+flukeTemptCell = [{'peakFreq'}, {'mainAmp'};...
+            mat2cell(peakFreqArray), mat2cell(mainAmpArray);...
+            {'avrgFreq'}, {'avrgAmp'};...
+            mat2cell];
