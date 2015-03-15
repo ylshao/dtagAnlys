@@ -83,13 +83,13 @@ statAccelAxMean = Seg.statAccelMean(:, 1);
 totalAccelAyMean = Seg.totalAccelMean(:, 1);
 metric = [peakFreq mainAmp odbaMean statAccelAxMean totalAccelAyMean];
 
-CLUST_NUM = 6;
-maxClustNum = CLUST_NUM;
+maxClustNum = 20;
 for iMetric = 1:size(metric, 2)
     maxClustNum = min(maxClustNum, numel(find(~isnan(metric(:,iMetric)))));
 end
+CLUST_NUM = maxClustNum;
 
-[clustInd, centrd] = kmeans(metric, maxClustNum, 'Distance', 'cityblock', 'Display','iter');%'Distance','cityblock',
+[clustInd, centrd] = kmeans(metric, CLUST_NUM, 'Display','iter');%'Distance','cityblock',
 
 flukeCentrd = find(centrd(:, 1) < FlukeThld.maxFreq & ...
         centrd(:, 1) > FlukeThld.minFreq);
