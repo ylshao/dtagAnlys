@@ -51,7 +51,7 @@ FlukeThld.minFreq = FREQ_AVRG-FREQ_STD; FlukeThld.maxFreq = FREQ_AVRG+FREQ_STD;
 FlukeThld.minAmp = AMP_AVRG-AMP_STD; FlukeThld.maxAmp = AMP_AVRG+AMP_STD;
 
 % find flukes
-TagData(1).FlukeSeg = getFluke(TagData, FlukeThld, 'kmeans');
+TagData(1).FlukeSeg = getFluke(TagData, FlukeThld, 'fft');
 plotFluke(TagData(1))
 %% Get glide
 TagData(1).GlideSeg = getGlide(TagData(1));

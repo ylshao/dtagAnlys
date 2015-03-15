@@ -103,7 +103,11 @@ function peakFreq = getDomFreq(data, sampleFreq, startFreq)
     if dataNum > 5
         magFft = abs(fft(dataDetr, dataNum))/dataNum;
         freqSpec = ((0:dataNum/2-1)/dataNum*sampleFreq)';
-        startInd = ceil((dataNum/2-1)/sampleFreq*startFreq*2);
+        if startFreq == 0
+            startInd = 1;
+        else
+            startInd = ceil((dataNum/2-1)/sampleFreq*startFreq*2);
+        end
         [~, peakInd] = max(magFft(startInd:length(freqSpec)));
         peakFreq = freqSpec(peakInd+startInd-1);
     else
