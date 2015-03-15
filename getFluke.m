@@ -81,15 +81,15 @@ odbaMean = Seg.odbaMean;
 
 statAccelAxMean = Seg.statAccelMean(:, 1);
 totalAccelAyMean = Seg.totalAccelMean(:, 1);
-metric = [peakFreq mainAmp odbaMean statAccelAxMean totalAccelAyMean];
+metric = [peakFreq mainAmp];% odbaMean statAccelAxMean totalAccelAyMean];
 
-CLUST_NUM = 6;
+CLUST_NUM = 11;
 maxClustNum = CLUST_NUM;
 for iMetric = 1:size(metric, 2)
     maxClustNum = min(maxClustNum, numel(find(~isnan(metric(:,iMetric)))));
 end
 
-[clustInd, centrd] = kmeans(metric, maxClustNum, 'Distance', 'cityblock', 'Display','iter');%'Distance','cityblock',
+[clustInd, centrd] = kmeans(metric, maxClustNum, 'Display','final', 'Replicates', 10);%'Distance','cityblock',
 
 flukeCentrd = find(centrd(:, 1) < FlukeThld.maxFreq & ...
         centrd(:, 1) > FlukeThld.minFreq);
@@ -105,6 +105,10 @@ indFlukeSeg = find(~isnan(flukeSel));
     Fluke.indCell = Seg.indCell(indFlukeSeg);
     Fluke.timeCell = Seg.timeCell(indFlukeSeg);
     Fluke.num = numel(indFlukeSeg);
+    Fluke.Kmeans.clustInd = clustInd;
+    Fluke.Kmeans.centrd = centrd;
+    Fluke.Kmeans.flukeCentrd = flukeCentrd;
+    Fluke.Kmeans.clustNum = maxClustNum;
 end
 
 
