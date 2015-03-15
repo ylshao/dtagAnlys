@@ -1,5 +1,26 @@
 function TagData = optCalib(TagData, nTagData)
 
+satisCalib = 0;
+while ~satisCalib
+    TagData = reoptCalib(TagData, nTagData);
+    correctKey = 0;
+    while ~correctKey
+    keyPress = input('Satis for the calib? y, n  ', 's');
+    switch keyPress(1)
+        case 'y'
+            satisCalib = 1;
+            correctKey = 1;
+        case 'n'
+            correctKey = 1;
+        otherwise
+            fprintf('Please type y, n')
+    end
+    end
+end
+
+end
+
+function TagData = reoptCalib(TagData, nTagData)
 RawVolt = TagData(nTagData).RawVolt;
 Calib = TagData(nTagData).CalibOrig;
 prefix = TagData(nTagData).deployName;
