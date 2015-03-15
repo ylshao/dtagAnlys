@@ -14,7 +14,7 @@ for iMetric = 1:size(metric, 2)
     maxClustNum = min(maxClustNum, numel(find(~isnan(metric(:,iMetric)))));
 end
 
-[clustInd, centrd] = kmeans(metric, maxClustNum, 'Distance', 'cityblock' ,'Display','final', 'Replicates', 10);
+[clustInd, centrd] = kmeans(metric, maxClustNum, 'Display','final', 'Replicates', 10);
 
 flukeCentrd = find(centrd(:, 1) < FlukeThld.maxFreq & ...
         centrd(:, 1) > FlukeThld.minFreq)
@@ -39,7 +39,7 @@ figure(743); clf
 plot(eva)
 %%
 figure(652); clf
-[silh,h] = silhouette(metric, clustInd, 'cityblock');
+[silh,h] = silhouette(metric, clustInd);
 % cluster3 = mean(silh3)
 % cluster4 = mean(silh4)
 %%
