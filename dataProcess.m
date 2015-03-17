@@ -3,8 +3,8 @@ clc
 
 %%
 % tempFeb24
-load('dataMar11')
-TagData = TagData268; nTagData = 1;
+load('Mar15')
+% TagData = TagData268; nTagData = 1;
 %% Shift Depth to Zero
 TagData = shiftDepth(TagData, nTagData, 'interp');
 
@@ -34,18 +34,18 @@ plotSeg(TagData(1))
 %         main Amp instead of mean Amp;
 %         the cut peak is p2p or peak? comment clearly;
 %         already selected flukes, average the fft
-tic;
+% tic;
 TagData(1).AccelStat = getOdba(TagData(1));
 % plotStaAccel(TagData(1))
 TagData(1).DepthSeg = getSegStat(TagData(1));
-toc
+% toc
 
 %% Get fluke segments
 % change: better way to estimate freq and amp;
 % define the criteria for flukes
 
 % find flukes
-TagData(1).FlukeSeg = getFluke(TagData, FlukeThld, 'fft');
+TagData(1).FlukeSeg = getFluke(TagData, FlukeThld, 'kmeans');
 plotFluke(TagData(1))
 %% Get glide
 TagData(1).GlideSeg = getGlide(TagData(1));

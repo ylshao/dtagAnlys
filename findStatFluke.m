@@ -11,11 +11,12 @@ peakFreqArray = nan(nSelSegCell, 1);
 mainAmpArray = nan(nSelSegCell, 1);
 BIN_NUM = 4;
 ENABLE_PLOT = 0;
+THLD_PEAK = 0.25;
 for i = 1:nSelSegCell
     time = timeHour(selSegCell{i});
     data = accelTag(selSegCell{i},1);
     thisPeakFreq = getDomFreq(data, sampleFreq, 0, ENABLE_PLOT);
-    thisMainAmp = getMainAmp(data, ENABLE_PLOT, BIN_NUM);
+    thisMainAmp = getMainAmp(data, ENABLE_PLOT, THLD_PEAK, BIN_NUM);
     peakFreqArray(i) = thisPeakFreq;
     mainAmpArray(i) = thisMainAmp;
     if ENABLE_PLOT; figure; plot(time, data); end

@@ -91,9 +91,10 @@ end
 
 [clustInd, centrd] = kmeans(metric, maxClustNum, 'Display','final', 'Replicates', 10);%'Distance','cityblock',
 
+% flukeCentrd = find(centrd(:, 1) < FlukeThld.maxFreq & ...
+%         centrd(:, 1) > FlukeThld.minFreq);
 flukeCentrd = find(centrd(:, 1) < FlukeThld.maxFreq & ...
-        centrd(:, 1) > FlukeThld.minFreq);
-
+        centrd(:, 1) > 0.6);
     flukeSel = nan(Seg.num, 1);
 for iCentrd = 1:numel(flukeCentrd)
     flukeSel(clustInd == flukeCentrd(iCentrd)) = 1;
